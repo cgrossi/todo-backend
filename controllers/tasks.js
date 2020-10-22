@@ -2,9 +2,25 @@ const tasksRouter = require('express').Router();
 const Task = require('../models/task');
 
 tasksRouter.get('/', (req, res) => {
-  res.json({
-    message: 'Hello from express'
-  })
+  Task.find({})
+    .then(tasks => {
+      res.json(tasks)
+    })
+})
+
+tasksRouter.put('/:id', (req, res, next) => {
+  const body = req.body
+  const task = {
+    content: body.content,
+    important: body.important
+  }
+
+  Task.findByIdAndUpdate(req.params.id, task, {new: true})
+    .then(updatedTask => {
+      res.json(updatedTask)
+    })
+    .catch(e => next(e))
+
 })
 
 tasksRouter.post('/', (req, res) => {
@@ -20,6 +36,12 @@ tasksRouter.post('/', (req, res) => {
       return res.json(result)
     })
   }
+})
+
+tasksRouter.delete('/:id', (req, res, next) => {
+  Task.findByIdAndRemove(req.params.id)
+    .then(() => res.status(204).end())
+    .catch(e => next(e))
 })
 
 module.exports = tasksRouter
